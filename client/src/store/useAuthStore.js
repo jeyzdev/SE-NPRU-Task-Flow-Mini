@@ -7,13 +7,11 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   isLoggingIn: false,
   isSigningUp: false,
-  isUpdatingProfile: false,
   signUp: async (data) => {
     set({ isSigningUp: true });
     try {
       const response = await api.post("/auth/register", data);
       set({ authUser: response.data });
-      get().connectSocket();
       toast.success("Account created successfully!");
     } catch (e) {
       toast.error(e.response.data.message || "Sign Up failed");
@@ -26,11 +24,17 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoggingIn: true });
     try {
       const response = await api.post("/auth/login", data);
+
+      // 1. เก็บข้อมูลเบื้องต้นที่ได้จาก Login (เช่น token หรือ user พื้นฐาน)
       set({ authUser: response.data });
-      get().connectSocket();
+
+      // 2. เรียกเช็ค Auth อีกรอบทันทีเพื่อให้ได้ข้อมูล Profile ที่สมบูรณ์
+      // และรอให้มันทำงานเสร็จก่อน (await) เพื่อให้ State นิ่ง
+      await get().checkAuth();
+
       toast.success("Logged in successfully!");
     } catch (e) {
-      toast.error(e.response.data.message || "Log in Failed");
+      toast.error(e.response?.data?.message || "Log in Failed");
       set({ authUser: null });
     } finally {
       set({ isLoggingIn: false });
@@ -40,7 +44,6 @@ export const useAuthStore = create((set, get) => ({
     try {
       const response = await api.post("/auth/logout");
       set({ authUser: null });
-      get().disconnectSocket();
       toast.success(response.data.message);
     } catch (e) {
       toast.error(e.response.data.message || "Log Out failed");
@@ -57,17 +60,4 @@ export const useAuthStore = create((set, get) => ({
       set({ isCheckingAuth: false });
     }
   },
-  updateProfile: async (data) => {
-    set({ isUpdatingProfile: true });
-    try {
-      const response = await api.put(`/users/update-profile`, data);
-      set({ authUser: response.data.user });
-      toast(response.data.message);
-    } catch (e) {
-      toast.error(e.response.data.message || "Update Profile failed");
-    } finally {
-      set({ isUpdatingProfile: false });
-    }
-  },
-
 }));

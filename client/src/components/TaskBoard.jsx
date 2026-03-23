@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import TaskForm from "./TaskForm";
 import { useTaskStore } from "../store/useTaskStore";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import TaskItem from "./TaskItem";
 
 export default function TaskBoard() {
   const { fetchTasks, updateTaskStatus, tasks, isLoadingTasks } =
@@ -68,29 +69,16 @@ export default function TaskBoard() {
                   >
                     {tasksByStatus(col).map((task, index) => (
                       <Draggable
-                        // บังคับเป็น String ป้องกัน Error Invariant
                         draggableId={String(task._id)}
                         index={index}
                         key={String(task._id)}
                       >
                         {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`bg-base-100 p-4 mb-3 rounded-lg shadow border border-transparent transition-all ${
-                              snapshot.isDragging
-                                ? "shadow-2xl ring-2 ring-primary"
-                                : ""
-                            }`}
-                          >
-                            <p className="font-semibold">{task.title}</p>
-                            {task.description && (
-                              <p className="text-xs text-gray-400 mt-2 line-clamp-1">
-                                {task.description}
-                              </p>
-                            )}
-                          </div>
+                          <TaskItem
+                            task={task}
+                            provided={provided}
+                            snapshot={snapshot}
+                          />
                         )}
                       </Draggable>
                     ))}
