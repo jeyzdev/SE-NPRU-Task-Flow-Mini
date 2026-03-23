@@ -38,9 +38,12 @@ const signUp = async (req, res) => {
       // ส่ง Cookie
       res.cookie("jwt", token, {
         maxAge: 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite: "strict",
-        secure: node_mode === "production",
+        httpOnly: true, // ป้องกัน XSS
+
+        // ✅ แก้ไขส่วนนี้สำหรับ Vercel/Production
+        // หาก Domain ไม่ตรงกัน (Cross-site) ต้องใช้ SameSite: "none" และ Secure: true
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        secure: process.env.NODE_ENV === "production", // ต้องเป็น true เมื่อ SameSite เป็น "none"
       });
 
       // 🔥 หัวใจสำคัญ: ส่งข้อมูล User กลับไปเพื่อให้ Frontend เก็บเข้า Store ทันที
@@ -86,9 +89,12 @@ const signIn = async (req, res) => {
 
     res.cookie("jwt", token, {
       maxAge: 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: "strict",
-      secure: node_mode === "production",
+      httpOnly: true, // ป้องกัน XSS
+
+      // ✅ แก้ไขส่วนนี้สำหรับ Vercel/Production
+      // หาก Domain ไม่ตรงกัน (Cross-site) ต้องใช้ SameSite: "none" และ Secure: true
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      secure: process.env.NODE_ENV === "production", // ต้องเป็น true เมื่อ SameSite เป็น "none"
     });
 
     // 🔥 ส่ง fullName และ profilePic กลับไปด้วย
