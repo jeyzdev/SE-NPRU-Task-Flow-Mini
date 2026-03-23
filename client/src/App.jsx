@@ -5,40 +5,41 @@ import { useEffect } from "react";
 import { useAuthStore } from "./store/useAuthStore";
 import { Loader } from "lucide-react";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
 
-  if (isCheckingAuth && !authUser) {
+  if (isCheckingAuth) {
     return (
-      <div>
-        <Loader className="size-5 animate-spin" />
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader className="animate-spin" size={48} />
       </div>
     );
   }
+
   return (
     <div>
       <Routes>
         <Route
           path="/"
-          element={<Home />}
+          element={authUser ? <Home /> : <Navigate to="/login" />}
         />
-
-        {/* <Route
+        <Route
           path="/login"
-          element={authUser ? <Navigate to="/" /> : <LoginPage />}
+          element={authUser ? <Navigate to="/" /> : <Login />}
         />
-
         <Route
           path="/register"
-          element={authUser ? <Navigate to="/" /> : <SignUpPage />}
-        /> */}
-
+          element={authUser ? <Navigate to="/" /> : <Register />}
+        />
       </Routes>
-      <Toaster />
+      <Toaster position="top-right" />
     </div>
   );
 }

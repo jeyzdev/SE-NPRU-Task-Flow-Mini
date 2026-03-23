@@ -6,9 +6,10 @@ import { useTaskStore } from "../store/useTaskStore";
 export default function TaskBoard() {
   const { fetchTasks, getTasksByStatus, isLoadingTasks } = useTaskStore();
 
-  const todo = useTaskStore((s) => s.getTasksByStatus("todo"));
-  const inProgress = useTaskStore((s) => s.getTasksByStatus("in_progress"));
-  const done = useTaskStore((s) => s.getTasksByStatus("done"));
+    const tasks = useTaskStore((s) => s.tasks);
+    const todo = tasks.filter((t) => t.status === "todo");
+    const inProgress = tasks.filter((t) => t.status === "in_progress");
+    const done = tasks.filter((t) => t.status === "done");
 
   useEffect(() => {
     fetchTasks();

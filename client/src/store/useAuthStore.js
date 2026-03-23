@@ -50,7 +50,6 @@ export const useAuthStore = create((set, get) => ({
     try {
       const response = await api.get("/auth/me");
       set({ authUser: response.data });
-      get().connectSocket();
     } catch (e) {
       console.error("Error in check Auth", e);
       set({ authUser: null });
