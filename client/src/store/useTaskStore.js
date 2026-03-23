@@ -79,4 +79,27 @@ export const useTaskStore = create((set, get) => ({
   getTasksByStatus: (status) => {
     return get().tasks.filter((t) => t.status === status);
   },
+  updateTaskStatus: async (taskId, newStatus) => {
+    const previousTasks = get().tasks;
+
+    // 1. ทำ Optimistic Update (เปลี่ยนสถานะบนจอทันที)
+    const updatedTasks = previousTasks.map((t) =>
+      t._id === taskId ? { ...t, status: newStatus } : t,
+    );
+    set({ tasks: updatedTasks });
+
+    try {
+      // 2. ส่งไปที่ API (ใช้ _id ใน URL และส่ง status ใน Body)
+      const res = await api.put(`/tasks/${taskId}`, { status: newStatus });
+
+      // 3. Sync ข้อมูลจริงจาก Server กลับมา
+      set({
+        tasks: get().tasks.map((t) => (t._id === taskId ? res.data : t)),
+      });
+    } catch (e) {
+      // 4. ถ้า Error ให้ย้อนกลับ (Rollback)
+      set({ tasks: previousTasks });
+      toast.error("ย้ายสถานะไม่สำเร็จ");
+    }
+  },
 }));
